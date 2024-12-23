@@ -107,11 +107,33 @@ export class RoleGuard implements CanActivate {
     const tokenRoles =
       decodedToken?.resource_access?.['greeting-app']?.roles || [];
 
-    // Check if the user has at least one of the required roles
+    /*    // Check if the user has at least one of the required roles
     return this.hasRequiredRole(tokenRoles);
   }
 
   private hasRequiredRole(tokenRoles: string[]): boolean {
     return this.requiredRoles.some((role) => tokenRoles.includes(role));
+  }
+}*/
+    // Extract roles from query parameters
+    const queryRoles = this.extractRolesFromQuery(request.query);
+
+    // Check if the user has at least one role from the query parameters
+    return this.hasMatchingRole(tokenRoles, queryRoles);
+  }
+
+  private extractRolesFromQuery(query: any): string[] {
+    // Extract 'role' from query parameters. It can be a single role or an array of roles.
+    if (Array.isArray(query.role)) {
+      return query.role; // Multiple roles provided as an array
+    } else if (query.role) {
+      return [query.role]; // Single role provided as a string
+    }
+    return []; // No roles specified in the query
+  }
+
+  private hasMatchingRole(tokenRoles: string[], queryRoles: string[]): boolean {
+    // Check if there's an intersection between token roles and query roles
+    return queryRoles.some((queryRole) => tokenRoles.includes(queryRole));
   }
 }

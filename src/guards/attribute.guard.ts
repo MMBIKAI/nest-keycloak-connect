@@ -21,8 +21,20 @@ export class AttributeGuard implements CanActivate {
       return false;
     }
 
-    // Check if the token has the correct site attribute
+    /*   // Check if the token has the correct site attribute
     const site = decodedToken?.site;
     return site === 'Merignac'; // Ensure the 'site' attribute matches 'Merignac'
+  }
+}*/
+    // Check for 'site' attribute in token
+    const tokenSite = decodedToken?.site;
+    const querySite = request.query.site;
+    // Validate token site attribute
+    return this.validateSite(tokenSite, querySite);
+  }
+
+  private validateSite(tokenSite: string, querySite?: string): boolean {
+    // Compare token site and query site directly
+    return tokenSite === querySite;
   }
 }
