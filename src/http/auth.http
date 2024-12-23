@@ -1,0 +1,29 @@
+GET http://localhost:3006/auth/arabic
+
+###
+
+GET http://localhost:3006/auth/messages
+
+###
+
+POST http://localhost:3006/auth/create
+Content-Type: application/json
+
+{
+    "message": "Salam ila el 3alam",
+    "language": "arabic"
+}
+
+###
+
+PUT http://localhost:3006/auth/edit/spanish
+Content-Type: application/json
+
+{
+    "message": "Hola el mundo !!!!",
+    "language": "spanish"
+}
+
+###
+
+DELETE http://localhost:3006/auth/delete/english
