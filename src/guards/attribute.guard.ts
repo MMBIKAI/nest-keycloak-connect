@@ -83,7 +83,14 @@ export class AttributeGuard implements CanActivate {
       return false;
     }
 
-    const decodedToken = this.tokenService.decodeToken(token);
+    let decodedToken;
+    try {
+      decodedToken = this.tokenService.decodeToken(token);
+    } catch (error) {
+      console.log('Error decoding token:', error.message);
+      return false; // Return false if there's an error decoding the token (malformed)
+    }
+
     if (!decodedToken) {
       console.log('Invalid token.');
       return false;
@@ -93,6 +100,18 @@ export class AttributeGuard implements CanActivate {
     const querySite = request.query.site;
     const queryDn = request.query.root; // Make sure 'root' is the query parameter name
 
+    console.log('Query Parameters:', { querySite, queryDn });
+
+    // If 'site' query parameter is missing, return false
+    if (!querySite) {
+      console.log('Missing query parameter: site.');
+      return false;
+    }
+
+    if (!queryDn) {
+      console.log('Missing query parameter: root.');
+      return false;
+    }
     // Extract attributes from the token
     const tokenSite = decodedToken?.site;
     const tokenDn = decodedToken?.root;
