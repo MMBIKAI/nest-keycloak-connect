@@ -76,66 +76,88 @@ export class AttributeGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
 
-    // Extract and decode the token
+    const token = this.extractAndDecodeToken(authHeader);
+    if (!token) {
+      return false;
+    }
+
+    const { querySite, queryDn } = this.extractQueryParameters(request);
+    if (!querySite || !queryDn) {
+      return false;
+    }
+
+    const { tokenSite, tokenDn } = this.extractTokenAttributes(token);
+    if (!this.validateSite(tokenSite, querySite)) {
+      return false;
+    }
+
+    if (!this.validateRoot(tokenDn, queryDn)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private extractAndDecodeToken(authHeader: string): any {
     const token = this.tokenService.extractTokenFromHeader(authHeader);
     if (!token) {
       console.log('No token found.');
-      return false;
+      return null;
     }
 
-    let decodedToken;
     try {
-      decodedToken = this.tokenService.decodeToken(token);
+      return this.tokenService.decodeToken(token);
     } catch (error) {
       console.log('Error decoding token:', error.message);
-      return false; // Return false if there's an error decoding the token (malformed)
+      return null;
     }
+  }
 
-    if (!decodedToken) {
-      console.log('Invalid token.');
-      return false;
-    }
-
-    // Retrieve query parameters
+  private extractQueryParameters(request: any): {
+    querySite: string;
+    queryDn: string;
+  } {
     const querySite = request.query.site;
-    const queryDn = request.query.root; // Make sure 'root' is the query parameter name
-
+    const queryDn = request.query.root;
     console.log('Query Parameters:', { querySite, queryDn });
 
-    // If 'site' query parameter is missing, return false
     if (!querySite) {
       console.log('Missing query parameter: site.');
-      return false;
     }
 
     if (!queryDn) {
       console.log('Missing query parameter: root.');
-      return false;
     }
-    // Extract attributes from the token
+
+    return { querySite, queryDn };
+  }
+
+  private extractTokenAttributes(decodedToken: any): {
+    tokenSite: string;
+    tokenDn: string;
+  } {
     const tokenSite = decodedToken?.site;
     const tokenDn = decodedToken?.root;
-
     console.log('Decoded Token Site:', tokenSite);
-    console.log('Query Site:', querySite);
+    console.log('Decoded Token DN:', tokenDn);
+    return { tokenSite, tokenDn };
+  }
 
-    // Validate the 'site' attribute
+  private validateSite(tokenSite: string, querySite: string): boolean {
     const isSiteValid = this.validateAttribute(tokenSite, querySite, 'site');
     if (!isSiteValid) {
       console.log('Site validation failed.');
       return false;
     }
+    return true;
+  }
 
-    console.log('Decoded Token DN:', tokenDn);
-    console.log('Query DN:', queryDn);
-
-    // Check if the 'root' (LDAP DN) contains the required 'OU=OU-EMI' and 'OU=OU-FONCTIONNEL'
+  private validateRoot(tokenDn: string, queryDn: string): boolean {
     const isRootValid = this.checkRoot(tokenDn, queryDn);
     if (!isRootValid) {
       console.log('Root validation failed.');
       return false;
     }
-
     return true;
   }
 
