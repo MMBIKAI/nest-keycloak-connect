@@ -63,7 +63,7 @@ export class AuthController {
       const result = await this.authService.findByLang(language);
 
       // If no message is found for the language, return a friendly message
-      if (!result) {
+      if (Array.isArray(result) && result.length === 0) {
         return {
           message: `No messages found for language: ${language}`,
         };
@@ -88,6 +88,13 @@ export class AuthController {
   @UseGuards(RoleGuard, AttributeGuard)
   async create(@Body() body: Greeting) {
     try {
+      // Check if the body contains the required fields
+      if (!body || !body.message || !body.language) {
+        throw new HttpException(
+          'Missing required fields: message or language',
+          HttpStatus.BAD_REQUEST, // Return 400 Bad Request if required fields are missing
+        );
+      }
       console.log('POST /auth called with:', body); // Debug log
       // Calling the service method to create a new greeting message
       const result = await this.authService.create(body);
@@ -99,6 +106,12 @@ export class AuthController {
       };
     } catch (error) {
       console.error('Error creating message:', error); // Log the error for debugging purposes
+
+      // Check if the error is an instance of HttpException and rethrow it
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      // Return a generic internal server error for other cases
       throw new HttpException(
         'Failed to create greeting message',
         HttpStatus.INTERNAL_SERVER_ERROR, // Return a 500 Internal Server Error
@@ -125,7 +138,7 @@ export class AuthController {
         };
       }
     } catch (error) {
-      console.error('Error deleting messages:', error); // Log the error for debugging
+      console.log('Error deleting messages:', error); // Log the error for debugging
 
       // Return a custom error message
       throw new HttpException(
