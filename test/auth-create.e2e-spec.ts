@@ -49,9 +49,9 @@ describe('AuthController - Mock DB operations', () => {
         AuthModule,
         TypeOrmModule.forRoot({
           type: 'sqlite',
-          database: './data/data.db', // In this case, it's not actually used
-          entities: [Greeting],
-          synchronize: true,
+          database: 'src/nest-test-db/data.db', // Update path relative to your project root
+          entities: [Greeting], // Add other entities here if necessary
+          synchronize: true, // Be careful with this in production environments
         }),
       ],
       providers: [
@@ -83,9 +83,9 @@ describe('AuthController - Mock DB operations', () => {
       .send(newMessage)
       .expect(201)
       .expect((response) => {
-        expect(response.body).toHaveProperty('id');
-        expect(response.body).toHaveProperty('message', 'Hallo Welt');
-        expect(response.body).toHaveProperty('language', 'german');
+        expect(response.body).toHaveProperty('data.id');
+        expect(response.body.data).toHaveProperty('message', 'Hallo Welt');
+        expect(response.body.data).toHaveProperty('language', 'german');
       });
   });
 });

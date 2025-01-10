@@ -140,9 +140,27 @@ describe('AuthController', () => {
 
   describe('create', () => {
     it('should create a new greeting message', async () => {
+      // Mock response data
+      const mockResponse = {
+        message: 'Greeting message created successfully',
+        data: {
+          ...mockGreeting,
+          id: 20, // Simulate the auto-generated id
+        },
+      };
+
+      // Mock the AuthService's create method to return the mockResponse
+      const createMock = jest.fn().mockResolvedValue(mockResponse);
+      authService.create = createMock;
+
+      // Call the create method of the controller
       const result = await authController.create(mockGreeting);
-      expect(result.message).toBe('Greeting message created successfully');
-      expect(result.data).toEqual(mockGreeting);
+
+      // Check that the create method was called
+      expect(createMock).toHaveBeenCalledWith(mockGreeting);
+
+      // Check the response
+      expect(result).toEqual(mockResponse);
     });
 
     it('should throw an error if creation fails', async () => {

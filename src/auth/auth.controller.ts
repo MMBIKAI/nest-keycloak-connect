@@ -100,10 +100,7 @@ export class AuthController {
       const result = await this.authService.create(body);
 
       // Return success response with the created greeting message
-      return {
-        message: 'Greeting message created successfully',
-        data: result, // Optionally return the created message in the response
-      };
+      return result; // Return the result from the service directly
     } catch (error) {
       console.error('Error creating message:', error); // Log the error for debugging purposes
 

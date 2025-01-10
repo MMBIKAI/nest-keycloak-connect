@@ -14,7 +14,7 @@ describe('AuthController - get all messages (e2e)', () => {
         AuthModule,
         TypeOrmModule.forRoot({
           type: 'sqlite',
-          database: './data/data.db', // Use a separate test database file
+          database: 'src/nest-test-db/data.db', // Use a separate test database file
           entities: [Greeting],
           synchronize: true,
         }),
