@@ -75,10 +75,15 @@ export class AuthService {
     const newGreeting = this.greetingRepository.create(message);
 
     try {
-      return await this.greetingRepository.save(newGreeting);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const savedGreeting = await this.greetingRepository.save(newGreeting);
+
+      return {
+        message: 'Greeting message created successfully',
+        data: savedGreeting, // Returning the saved data
+      };
     } catch (error) {
       // Handle any errors that occur during the saving process
+      console.error('Error saving greeting:', error);
       throw new HttpException(
         'Error saving greeting to the database',
         HttpStatus.INTERNAL_SERVER_ERROR,
